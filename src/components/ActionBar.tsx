@@ -19,13 +19,14 @@ export function ActionBar({ disabled, copied, onShare, onCopy }: ActionBarProps)
         onClick={onShare}
         disabled={disabled}
         whileTap={disabled ? undefined : { scale: 0.97 }}
-        className={`flex items-center justify-center gap-2 rounded-2xl border px-5 py-3.5 text-sm font-bold transition-all duration-300 ${
+        whileHover={disabled ? undefined : { scale: 1.01 }}
+        className={`flex items-center justify-center gap-2.5 rounded-2xl border px-5 py-3.5 text-sm font-bold transition-all duration-300 ${
           disabled
-            ? "cursor-not-allowed border-white/10 bg-white/5 text-zinc-600"
-            : "border-blue-500/40 bg-blue-500/10 text-blue-200 shadow-[0_0_28px_rgba(59,130,246,0.18)] hover:bg-blue-500/20 hover:shadow-[0_0_42px_rgba(59,130,246,0.32)]"
+            ? "cursor-not-allowed border-white/[0.05] bg-white/[0.02] text-slate-600"
+            : "border-emerald-500/35 bg-emerald-500/10 text-emerald-200 shadow-[0_0_24px_rgba(16,185,129,0.15)] hover:border-emerald-400/60 hover:bg-emerald-500/20 hover:text-emerald-100 hover:shadow-[0_0_36px_rgba(16,185,129,0.3)]"
         }`}
       >
-        <MessageCircle className="h-4 w-4" />
+        <MessageCircle className="h-4 w-4 text-emerald-400" />
         Share on WhatsApp
       </motion.button>
 
@@ -35,23 +36,24 @@ export function ActionBar({ disabled, copied, onShare, onCopy }: ActionBarProps)
         onClick={onCopy}
         disabled={disabled}
         whileTap={disabled ? undefined : { scale: 0.97 }}
-        className={`flex items-center justify-center gap-2 rounded-2xl border px-5 py-3.5 text-sm font-bold transition-all duration-300 ${
+        whileHover={disabled ? undefined : { scale: 1.01 }}
+        className={`flex items-center justify-center gap-2.5 rounded-2xl border px-5 py-3.5 text-sm font-bold transition-all duration-300 ${
           disabled
-            ? "cursor-not-allowed border-white/10 bg-white/5 text-zinc-600"
+            ? "cursor-not-allowed border-white/[0.05] bg-white/[0.02] text-slate-600"
             : copied
-              ? "border-blue-400/50 bg-blue-500/15 text-blue-300 shadow-[0_0_30px_rgba(59,130,246,0.3)]"
-              : "border-blue-500/30 bg-blue-500/10 text-blue-200 hover:bg-blue-500/20 hover:shadow-[0_0_30px_rgba(59,130,246,0.28)]"
+              ? "border-sky-400/60 bg-sky-500/20 text-sky-200 shadow-[0_0_30px_rgba(56,189,248,0.35)]"
+              : "border-indigo-400/30 bg-indigo-500/10 text-indigo-200 shadow-[0_0_20px_rgba(99,102,241,0.15)] hover:border-indigo-400/50 hover:bg-indigo-500/20 hover:text-white hover:shadow-[0_0_32px_rgba(99,102,241,0.3)]"
         }`}
       >
         {copied ? (
           <>
-            <Check className="h-4 w-4" />
-            Copied!
+            <Check className="h-4 w-4 text-sky-300" />
+            Copied to Clipboard!
           </>
         ) : (
           <>
-            <Copy className="h-4 w-4" />
-            Copy Text
+            <Copy className="h-4 w-4 text-indigo-300" />
+            Copy Translation
           </>
         )}
       </motion.button>

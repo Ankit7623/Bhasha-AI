@@ -36,31 +36,31 @@ export function HistoryDrawer({
   return (
     <div className="fixed inset-x-0 bottom-0 z-40">
       <div className="mx-auto w-full max-w-xl px-3 pb-3">
-        <div className="glass overflow-hidden rounded-3xl border-white/10 shadow-[0_-10px_50px_rgba(0,0,0,0.8)]">
+        <div className="glass-elevated overflow-hidden rounded-3xl border-white/10 shadow-[0_-12px_50px_rgba(0,0,0,0.85)]">
           {/* Handle / collapsed header */}
           <button
             type="button"
             onClick={onToggle}
             aria-expanded={open}
             aria-controls="history-sheet"
-            className="relative flex w-full items-center gap-3 px-4 py-3.5 text-left"
+            className="relative flex w-full items-center gap-3 px-4 py-3.5 text-left transition-colors hover:bg-white/[0.02]"
           >
-            <span className="absolute inset-x-0 top-1.5 mx-auto h-1 w-10 rounded-full bg-white/15" />
-            <span className="grid h-8 w-8 shrink-0 place-items-center rounded-xl border border-emerald-400/30 bg-emerald-500/10">
-              <History className="h-4 w-4 text-emerald-300" />
+            <span className="absolute inset-x-0 top-1.5 mx-auto h-1 w-10 rounded-full bg-white/20" />
+            <span className="grid h-8 w-8 shrink-0 place-items-center rounded-xl border border-indigo-400/30 bg-indigo-500/10 shadow-[0_0_12px_rgba(99,102,241,0.2)]">
+              <History className="h-4 w-4 text-indigo-300" />
             </span>
             <span className="flex min-w-0 flex-1 flex-col">
               <span className="text-xs font-bold tracking-tight text-white">
                 Recent Voice Translations
               </span>
-              <span className="text-[10px] font-medium text-zinc-500">
+              <span className="text-[10px] font-medium text-slate-400">
                 {items.length === 0
                   ? "Your recent voice translations appear here"
-                  : `${items.length} recent translations · tap to replay`}
+                  : `${items.length} translation${items.length === 1 ? "" : "s"} saved · tap to reload`}
               </span>
             </span>
             {items.length > 0 && (
-              <span className="rounded-full border border-emerald-400/30 bg-emerald-500/10 px-2 py-0.5 text-[10px] font-bold text-emerald-300">
+              <span className="rounded-full border border-indigo-400/30 bg-indigo-500/15 px-2.5 py-0.5 text-[10px] font-bold text-indigo-200">
                 {items.length}
               </span>
             )}
@@ -69,7 +69,7 @@ export function HistoryDrawer({
               transition={{ type: "spring", stiffness: 300, damping: 22 }}
               className="grid h-7 w-7 shrink-0 place-items-center rounded-full border border-white/10 bg-white/5"
             >
-              <ChevronUp className="h-3.5 w-3.5 text-zinc-300" />
+              <ChevronUp className="h-3.5 w-3.5 text-slate-300" />
             </motion.span>
           </button>
 
@@ -82,28 +82,28 @@ export function HistoryDrawer({
                 animate={{ height: "auto", opacity: 1 }}
                 exit={{ height: 0, opacity: 0 }}
                 transition={{ type: "spring", stiffness: 240, damping: 28 }}
-                className="overflow-hidden border-t border-white/8"
+                className="overflow-hidden border-t border-white/[0.08]"
               >
                 <div className="flex items-center justify-between px-4 pt-3">
-                  <span className="text-[9px] font-bold uppercase tracking-[0.18em] text-zinc-500">
-                    Session history
+                  <span className="text-[9px] font-bold uppercase tracking-[0.18em] text-slate-400">
+                    Session History
                   </span>
                   {items.length > 0 && (
                     <button
                       type="button"
                       onClick={onClear}
-                      className="inline-flex items-center gap-1 rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] font-semibold text-zinc-400 transition-colors hover:text-red-300"
+                      className="inline-flex items-center gap-1 rounded-full border border-white/10 bg-white/5 px-2.5 py-0.5 text-[10px] font-semibold text-slate-400 transition-colors hover:border-rose-500/30 hover:bg-rose-500/10 hover:text-rose-300"
                     >
                       <Trash2 className="h-3 w-3" />
-                      Clear
+                      Clear all
                     </button>
                   )}
                 </div>
 
                 <div className="max-h-[46vh] space-y-2 overflow-y-auto p-3">
                   {items.length === 0 ? (
-                    <p className="px-2 py-6 text-center text-xs text-zinc-600">
-                      No translations yet — speak into the mic.
+                    <p className="px-2 py-6 text-center text-xs text-slate-500">
+                      No translations yet — tap the mic to speak.
                     </p>
                   ) : (
                     items.map((item) => {
@@ -114,26 +114,26 @@ export function HistoryDrawer({
                           key={item.id}
                           type="button"
                           onClick={() => onSelect(item)}
-                          className="group flex w-full items-center gap-3 rounded-2xl border border-white/8 bg-white/[0.03] p-3 text-left transition-all hover:border-emerald-400/30 hover:bg-emerald-500/[0.06]"
+                          className="group flex w-full items-center gap-3 rounded-2xl border border-white/[0.06] bg-black/40 p-3 text-left backdrop-blur-sm transition-all duration-300 hover:border-indigo-400/40 hover:bg-indigo-500/[0.08] hover:shadow-[0_0_20px_rgba(99,102,241,0.15)]"
                         >
                           <span className="flex min-w-0 flex-1 flex-col gap-1">
-                            <span className="flex items-center gap-1.5 text-[9px] font-bold uppercase tracking-wider text-zinc-500">
+                            <span className="flex items-center gap-1.5 text-[9px] font-bold uppercase tracking-wider text-slate-400">
                               {from.english}
-                              <span className="text-zinc-700">→</span>
-                              <span className="text-emerald-400">
+                              <span className="text-slate-600">→</span>
+                              <span className="font-extrabold text-amber-300">
                                 {to.english}
                               </span>
-                              <span className="text-zinc-700">·</span>
+                              <span className="text-slate-600">·</span>
                               {timeAgo(item.createdAt)}
                             </span>
-                            <span className="truncate text-[11px] text-zinc-500">
+                            <span className="truncate text-[11px] text-slate-400">
                               {item.original}
                             </span>
-                            <span className="truncate text-sm font-semibold text-emerald-200">
+                            <span className="truncate text-sm font-semibold text-slate-100 group-hover:text-sky-200">
                               {item.translated}
                             </span>
                           </span>
-                          <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full border border-emerald-400/25 bg-emerald-500/10 text-emerald-300 transition-transform group-hover:scale-110">
+                          <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full border border-indigo-400/25 bg-indigo-500/10 text-indigo-300 transition-all duration-300 group-hover:scale-110 group-hover:border-indigo-400/50 group-hover:bg-indigo-500/20 group-hover:text-white">
                             <Play className="h-3.5 w-3.5" />
                           </span>
                         </button>

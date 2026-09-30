@@ -537,36 +537,35 @@ export function TranslatorApp({ hasGeminiKey }: TranslatorAppProps) {
   const micBlocked = micState === "denied" || micState === "unsupported";
 
   return (
-    <div className="relative min-h-dvh overflow-x-clip bg-black text-zinc-100">
-      {/* Ambient aurora background */}
+    <div className="relative min-h-dvh overflow-x-clip bg-[#050814] text-slate-100">
+      {/* Ambient aurora background mesh */}
       <div className="pointer-events-none fixed inset-0">
-        <div className="absolute -top-32 left-1/2 h-[420px] w-[420px] -translate-x-1/2 rounded-full bg-emerald-500/12 blur-[110px] animate-aurora" />
-        <div className="absolute right-[-120px] top-1/3 h-[360px] w-[360px] rounded-full bg-cyan-glow/10 blur-[120px] animate-aurora [animation-delay:-5s]" />
-        <div className="absolute bottom-[-140px] left-[-100px] h-[380px] w-[380px] rounded-full bg-emerald-500/8 blur-[130px] animate-aurora [animation-delay:-9s]" />
-        <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.025)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.025)_1px,transparent_1px)] bg-[size:36px_36px] [mask-image:radial-gradient(ellipse_75%_60%_at_50%_20%,black,transparent)]" />
+        <div className="absolute -top-36 left-1/2 h-[480px] w-[480px] -translate-x-1/2 rounded-full bg-indigo-600/15 blur-[120px] animate-aurora" />
+        <div className="absolute right-[-100px] top-1/3 h-[380px] w-[380px] rounded-full bg-sky-500/12 blur-[130px] animate-aurora [animation-delay:-5s]" />
+        <div className="absolute bottom-[-140px] left-[-100px] h-[400px] w-[400px] rounded-full bg-amber-500/8 blur-[140px] animate-aurora [animation-delay:-9s]" />
+        <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:40px_40px] [mask-image:radial-gradient(ellipse_80%_65%_at_50%_25%,black,transparent)]" />
       </div>
 
       <div className="relative z-10">
         <Header />
 
-        <main className="mx-auto w-full max-w-xl px-5 pb-44 pt-7">
+        <main className="mx-auto w-full max-w-xl px-5 pb-44 pt-6">
           {/* ---- Hero ---- */}
           <section className="flex flex-col items-center gap-6 text-center">
-            <div className="flex flex-col items-center gap-2.5">
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-blue-500/20 bg-blue-500/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-blue-200">
-                <AudioLines className="h-3 w-3 text-blue-300" />
+            <div className="flex flex-col items-center gap-3">
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-indigo-400/25 bg-gradient-to-r from-indigo-500/10 to-sky-500/10 px-3.5 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-indigo-200 shadow-[0_0_16px_rgba(99,102,241,0.15)]">
+                <AudioLines className="h-3 w-3 text-sky-400" />
                 हिन्दी · मराठी · தமிழ் · বাংলা · తెలుగు · ਪੰਜਾਬੀ · ગુજરાતી
               </span>
-              <h2 className="text-2xl font-extrabold tracking-tight text-white sm:text-3xl">
+              <h2 className="text-3xl font-black tracking-tight text-white sm:text-4xl">
                 Speak your mother tongue.
                 <br />
-                <span className="text-glow-neon text-blue-300">
+                <span className="bg-gradient-to-r from-sky-300 via-indigo-200 to-amber-200 bg-clip-text text-transparent text-glow-neon">
                   Be understood anywhere.
                 </span>
               </h2>
-              <p className="max-w-sm text-sm leading-relaxed text-zinc-400">
-                Bhasha AI records speech in 12+ Indian languages, transcribes
-                after you stop, then translates and speaks the result.
+              <p className="max-w-md text-sm leading-relaxed text-slate-400">
+                Bhasha AI captures voice in 12+ Indian languages, delivers real-time AI translation, native script, Roman pronunciation, and natural voice playback.
               </p>
             </div>
 
@@ -605,7 +604,7 @@ export function TranslatorApp({ hasGeminiKey }: TranslatorAppProps) {
             >
               <label
                 htmlFor="typed-translation"
-                className="block text-xs font-semibold text-zinc-400"
+                className="block text-xs font-bold uppercase tracking-wider text-slate-400"
               >
                 Or type a phrase
               </label>
@@ -615,36 +614,36 @@ export function TranslatorApp({ hasGeminiKey }: TranslatorAppProps) {
                   rows={2}
                   value={typedText}
                   onChange={(event) => setTypedText(event.target.value)}
-                  placeholder="Enter text to translate"
+                  placeholder="Enter text to translate..."
                   disabled={mode === "thinking"}
-                  className="min-h-14 min-w-0 flex-1 resize-y rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-zinc-100 outline-none placeholder:text-zinc-600 focus:border-emerald-400/50 disabled:opacity-50"
+                  className="min-h-14 min-w-0 flex-1 resize-y rounded-2xl border border-white/[0.08] bg-black/40 px-3.5 py-2.5 text-sm font-medium text-slate-100 outline-none backdrop-blur-md placeholder:text-slate-500 focus:border-indigo-400/50 focus:shadow-[0_0_20px_rgba(99,102,241,0.2)] disabled:opacity-50"
                 />
                 <button
                   type="submit"
                   disabled={!typedText.trim() || mode === "thinking"}
-                  className="inline-flex shrink-0 items-center justify-center gap-2 self-stretch rounded-xl border border-emerald-400/30 bg-emerald-500/10 px-4 text-sm font-semibold text-emerald-200 transition-colors hover:bg-emerald-500/20 disabled:cursor-not-allowed disabled:opacity-40"
+                  className="inline-flex shrink-0 items-center justify-center gap-2 self-stretch rounded-2xl border border-indigo-400/35 bg-gradient-to-b from-indigo-500/20 to-indigo-600/10 px-5 text-sm font-bold text-indigo-200 shadow-[0_0_20px_rgba(99,102,241,0.2)] transition-all duration-300 hover:border-indigo-400/60 hover:bg-indigo-500/30 hover:text-white hover:shadow-[0_0_30px_rgba(99,102,241,0.35)] disabled:cursor-not-allowed disabled:opacity-40"
                 >
-                  <Languages className="h-4 w-4" />
+                  <Languages className="h-4 w-4 text-amber-400" />
                   Translate
                 </button>
               </div>
-              <p className="text-[10px] leading-relaxed text-zinc-600">
+              <p className="text-[10px] leading-relaxed text-slate-500">
                 {!hasGeminiKey ? (
                   <>
                     Voice transcription needs{" "}
-                    <code className="rounded bg-white/5 px-1 py-0.5 text-[9px]">
+                    <code className="rounded border border-white/[0.08] bg-black/40 px-1 py-0.5 text-[9px] text-amber-300">
                       GEMINI_API_KEY
                     </code>{" "}
                     in{" "}
-                    <code className="rounded bg-white/5 px-1 py-0.5 text-[9px]">
+                    <code className="rounded border border-white/[0.08] bg-black/40 px-1 py-0.5 text-[9px] text-slate-300">
                       .env.local
                     </code>{" "}
-                    — typed text works without it.{" "}
+                    — typed text works directly.{" "}
                     <a
                       href="https://aistudio.google.com/apikey"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-emerald-400 underline"
+                      className="text-sky-400 underline hover:text-sky-300"
                     >
                       Get free key
                     </a>
@@ -652,8 +651,7 @@ export function TranslatorApp({ hasGeminiKey }: TranslatorAppProps) {
                   </>
                 ) : (
                   <>
-                    Voice sends audio to Gemini; typed text uses an online
-                    translator. Avoid sensitive content.
+                    Voice translates via Gemini 2.5 Flash with Indic phonetics engine.
                   </>
                 )}
               </p>
@@ -661,18 +659,14 @@ export function TranslatorApp({ hasGeminiKey }: TranslatorAppProps) {
           </section>
 
           {/* ---- Dual-text visual summary card ---- */}
-          <section className="mt-9">              <div className="mb-3 flex items-center gap-3 px-1">
-              <h3 className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.18em] text-zinc-500">
-                <Gauge className="h-3 w-3 text-blue-400" />
-                Visual summary
+          <section className="mt-9">
+            <div className="mb-3 flex items-center gap-3 px-1">
+              <h3 className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.18em] text-slate-400">
+                <Gauge className="h-3 w-3 text-sky-400" />
+                Visual Summary
               </h3>
             </div>
 
-            {/* The engine badge lives inside the card. This wrapper BINDS the
-                card's height: a fixed box means a translation can never shove
-                the action bar down the page. Measured cards run 343–471px on
-                desktop, but a long phrase on a 375px phone wrapped to a 967px
-                card, so the box scrolls instead of growing. */}
             <div className="h-[32rem] overflow-y-auto">
               <TranslationCard
                 result={result}
@@ -692,15 +686,13 @@ export function TranslatorApp({ hasGeminiKey }: TranslatorAppProps) {
             />
           </section>
 
-          {/* ---- Inline notice ----
-               Its space is reserved (two lines): a message appearing as a
-               translation lands must not move the footer. */}
+          {/* ---- Inline notice ---- */}
           <div className="mt-4 flex min-h-10 items-start justify-center">
             {notice && (
               <motion.p
                 initial={{ opacity: 0, y: 4 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="text-center text-xs font-medium leading-5 text-emerald-300/90"
+                className="text-center text-xs font-semibold leading-5 text-indigo-300 shadow-[0_0_20px_rgba(99,102,241,0.2)]"
                 role="status"
               >
                 {notice}
@@ -709,14 +701,14 @@ export function TranslatorApp({ hasGeminiKey }: TranslatorAppProps) {
           </div>
 
           {/* ---- Footer ---- */}
-          <footer className="mt-10 flex flex-col items-center gap-1.5 border-t border-white/5 pt-6 text-center">
-            <span className="inline-flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-600">
-              <Languages className="h-3 w-3 text-blue-400" />
-              Gemini voice transcription · 12+ Indian languages
+          <footer className="mt-10 flex flex-col items-center gap-2 border-t border-white/[0.06] pt-6 text-center">
+            <span className="inline-flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-400">
+              <Languages className="h-3 w-3 text-sky-400" />
+              Gemini Voice Transcription · 12+ Indian Languages
             </span>
-            <span className="inline-flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-[0.2em] text-blue-950/80">
-              <Fingerprint className="h-3 w-3 text-blue-400" />
-              Built for Bharat
+            <span className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.2em] text-indigo-300/80">
+              <Fingerprint className="h-3 w-3 text-amber-400" />
+              Built with Pride for Bharat
             </span>
           </footer>
         </main>
