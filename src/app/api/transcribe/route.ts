@@ -88,7 +88,7 @@ export async function POST(request: Request) {
     const models = [
       "gemini-flash-lite-latest",
       "gemini-flash-latest",
-      "gemini-3.5-flash",
+      "gemini-3.8-flash",
     ];
     let lastError = "Voice transcription failed.";
 

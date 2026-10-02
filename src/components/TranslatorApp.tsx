@@ -8,7 +8,7 @@ import {
   type FormEvent,
 } from "react";
 import { motion } from "framer-motion";
-import { AudioLines, Fingerprint, Gauge, Languages } from "lucide-react";
+import { AudioLines, Fingerprint, Gauge, Languages, Sprout } from "lucide-react";
 
 import { Header } from "@/components/Header";
 import { MicButton, type MicState } from "@/components/MicButton";
@@ -18,6 +18,8 @@ import { LanguageSelector } from "@/components/LanguageSelector";
 import { TranslationCard } from "@/components/TranslationCard";
 import { ActionBar } from "@/components/ActionBar";
 import { HistoryDrawer } from "@/components/HistoryDrawer";
+import { KisaanToggle } from "@/components/KisaanToggle";
+import { SolutionCard, type KisaanResult } from "@/components/SolutionCard";
 
 import {
   getLang,
@@ -63,6 +65,12 @@ export function TranslatorApp({ hasGeminiKey }: TranslatorAppProps) {
   const [autoSpeak, setAutoSpeak] = useState(true);
   const [notice, setNotice] = useState<string | null>(null);
 
+  /* ---------------- kisaan (farmer) mode state ---------------- */
+  const [kisaanMode, setKisaanMode] = useState(false);
+  const [kisaanResult, setKisaanResult] = useState<KisaanResult | null>(null);
+  const [kisaanLoading, setKisaanLoading] = useState(false);
+  const [kisaanSpeaking, setKisaanSpeaking] = useState(false);
+
   /* ---------------- refs the Web Speech callbacks need ---------------- */
   const recorderRef = useRef<MediaRecorder | null>(null);
   const mediaStreamRef = useRef<MediaStream | null>(null);
@@ -75,6 +83,8 @@ export function TranslatorApp({ hasGeminiKey }: TranslatorAppProps) {
   pairRef.current = { from, to };
   const autoSpeakRef = useRef(autoSpeak);
   autoSpeakRef.current = autoSpeak;
+  const kisaanModeRef = useRef(kisaanMode);
+  kisaanModeRef.current = kisaanMode;
 
   const copyTimer = useRef<number | null>(null);
   const ttsOk = useRef(true);
@@ -153,6 +163,68 @@ export function TranslatorApp({ hasGeminiKey }: TranslatorAppProps) {
     speak(result.translated, result.to, result.transliteration);
   }, [result, speaking, speak]);
 
+  /* ---------------- kisaan (farmer) assistant call ---------------- */
+  const callKisaanApi = useCallback(
+    async (text: string, langCode: LangCode) => {
+      setKisaanLoading(true);
+      setKisaanResult(null);
+      setNotice(null);
+      try {
+        const res = await fetch("/api/sahayak", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ text, langCode }),
+        });
+        const json = (await res.json()) as {
+          ok: boolean;
+          solution?: string;
+          summary?: string;
+          langCode?: string;
+          error?: string;
+        };
+        if (!json.ok || !json.solution) {
+          throw new Error(json.error || "AI Sahayak could not generate advice.");
+        }
+        const result: KisaanResult = {
+          question: text,
+          solution: json.solution,
+          summary: json.summary || "",
+          langCode,
+        };
+        setKisaanResult(result);
+        // Auto-speak the solution
+        if (autoSpeakRef.current) {
+          const locale = getLang(langCode).speech;
+          setKisaanSpeaking(true);
+          speakText(result.solution, locale, () => setKisaanSpeaking(false));
+        }
+      } catch (err) {
+        setNotice(
+          err instanceof Error
+            ? err.message
+            : "AI Sahayak failed — try again.",
+        );
+      } finally {
+        setKisaanLoading(false);
+        setMode("ready");
+        setMicState("idle");
+      }
+    },
+    [],
+  );
+
+  const handleKisaanSpeak = useCallback(() => {
+    if (!kisaanResult) return;
+    if (kisaanSpeaking) {
+      stopSpeaking();
+      setKisaanSpeaking(false);
+      return;
+    }
+    const locale = getLang(kisaanResult.langCode).speech;
+    setKisaanSpeaking(true);
+    speakText(kisaanResult.solution, locale, () => setKisaanSpeaking(false));
+  }, [kisaanResult, kisaanSpeaking]);
+
   /* ---------------- run one translation ---------------- */
   const commit = useCallback(
     (translation: TranslationResult) => {
@@ -181,6 +253,13 @@ export function TranslatorApp({ hasGeminiKey }: TranslatorAppProps) {
     async (text: string, fromCode: LangCode, toCode: LangCode) => {
       setMode("thinking");
       setMicState("thinking");
+
+      // Route to Kisaan API when farmer mode is active
+      if (kisaanModeRef.current) {
+        await callKisaanApi(text, fromCode);
+        return;
+      }
+
       try {
         const { result: translated } = await callAgent({
           text,
@@ -196,7 +275,7 @@ export function TranslatorApp({ hasGeminiKey }: TranslatorAppProps) {
         setNotice("Translation failed — check your connection and try again.");
       }
     },
-    [commit],
+    [commit, callKisaanApi],
   );
 
   const handleTranslateTyped = useCallback(
@@ -359,33 +438,33 @@ export function TranslatorApp({ hasGeminiKey }: TranslatorAppProps) {
       setMode("listening");
       setMicState("listening");
 
+      let hasCapturedText = false;
       const recognition = startSpeechRecognition({
         lang: getLang(pairRef.current.from).speech,
-        onResult: async (transcript) => {
+        onResult: async (transcript, isFinal) => {
           if (recognitionFallbackTimerRef.current) {
             window.clearTimeout(recognitionFallbackTimerRef.current);
             recognitionFallbackTimerRef.current = null;
           }
           setFinalText(transcript);
-          setMode("thinking");
-          setMicState("thinking");
-          setNotice(null);
-          await translateFinal(
-            transcript,
-            pairRef.current.from,
-            pairRef.current.to,
-          );
+          if (isFinal || transcript.trim().length > 3) {
+            hasCapturedText = true;
+            setMode("thinking");
+            setMicState("thinking");
+            setNotice(null);
+            await translateFinal(
+              transcript,
+              pairRef.current.from,
+              pairRef.current.to,
+            );
+          }
         },
-        onError: (message) => {
+        onError: () => {
           if (recognitionFallbackTimerRef.current) {
             window.clearTimeout(recognitionFallbackTimerRef.current);
             recognitionFallbackTimerRef.current = null;
           }
           recognitionRef.current = null;
-          setNotice(
-            message ||
-              "Speech recognition failed. Falling back to mic capture.",
-          );
           void startFallbackRecorder();
         },
         onEnd: () => {
@@ -393,7 +472,9 @@ export function TranslatorApp({ hasGeminiKey }: TranslatorAppProps) {
             window.clearTimeout(recognitionFallbackTimerRef.current);
             recognitionFallbackTimerRef.current = null;
           }
-          if (modeRef.current === "listening") {
+          if (modeRef.current === "listening" && !hasCapturedText) {
+            void startFallbackRecorder();
+          } else if (modeRef.current === "listening") {
             setMode("idle");
             setMicState("idle");
           }
@@ -569,6 +650,19 @@ export function TranslatorApp({ hasGeminiKey }: TranslatorAppProps) {
               </p>
             </div>
 
+            {/* ---- Kisaan Mode toggle ---- */}
+            <div className="w-full">
+              <KisaanToggle
+                enabled={kisaanMode}
+                onToggle={() => {
+                  setKisaanMode((v) => !v);
+                  setKisaanResult(null);
+                  setNotice(null);
+                }}
+                disabled={mode === "listening" || mode === "thinking"}
+              />
+            </div>
+
             {/* ---- Language selector bar ---- */}
             <div className="w-full">
               <LanguageSelector
@@ -614,7 +708,18 @@ export function TranslatorApp({ hasGeminiKey }: TranslatorAppProps) {
                   rows={2}
                   value={typedText}
                   onChange={(event) => setTypedText(event.target.value)}
-                  placeholder="Enter text to translate..."
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter" && !event.shiftKey) {
+                      event.preventDefault();
+                      if (typedText.trim() && mode !== "thinking") {
+                        const fakeEvent = {
+                          preventDefault: () => {},
+                        } as FormEvent<HTMLFormElement>;
+                        void handleTranslateTyped(fakeEvent);
+                      }
+                    }
+                  }}
+                  placeholder="Enter text to translate (Press Enter to translate)..."
                   disabled={mode === "thinking"}
                   className="min-h-14 min-w-0 flex-1 resize-y rounded-2xl border border-white/[0.08] bg-black/40 px-3.5 py-2.5 text-sm font-medium text-slate-100 outline-none backdrop-blur-md placeholder:text-slate-500 focus:border-indigo-400/50 focus:shadow-[0_0_20px_rgba(99,102,241,0.2)] disabled:opacity-50"
                 />
@@ -658,23 +763,42 @@ export function TranslatorApp({ hasGeminiKey }: TranslatorAppProps) {
             </form>
           </section>
 
-          {/* ---- Dual-text visual summary card ---- */}
-          <section className="mt-9">
-            <div className="mb-3 flex items-center gap-3 px-1">
-              <h3 className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.18em] text-slate-400">
-                <Gauge className="h-3 w-3 text-sky-400" />
-                Visual Summary
-              </h3>
-            </div>
+          {/* ---- Kisaan Solution / Translation Card ---- */}
+          {kisaanMode ? (
+            <section className="mt-9">
+              <div className="mb-3 flex items-center gap-3 px-1">
+                <h3 className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.18em] text-emerald-400">
+                  <Sprout className="h-3 w-3 text-emerald-400" />
+                  AI Sahayak
+                </h3>
+              </div>
+              <div className="max-h-[36rem] overflow-y-auto">
+                <SolutionCard
+                  result={kisaanResult}
+                  loading={kisaanLoading}
+                  speaking={kisaanSpeaking}
+                  onSpeak={handleKisaanSpeak}
+                />
+              </div>
+            </section>
+          ) : (
+            <section className="mt-9">
+              <div className="mb-3 flex items-center gap-3 px-1">
+                <h3 className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.18em] text-slate-400">
+                  <Gauge className="h-3 w-3 text-sky-400" />
+                  Visual Summary
+                </h3>
+              </div>
 
-            <div className="h-[32rem] overflow-y-auto">
-              <TranslationCard
-                result={result}
-                speaking={speaking}
-                onPlay={handlePlay}
-              />
-            </div>
-          </section>
+              <div className="h-[32rem] overflow-y-auto">
+                <TranslationCard
+                  result={result}
+                  speaking={speaking}
+                  onPlay={handlePlay}
+                />
+              </div>
+            </section>
+          )}
 
           {/* ---- Action bar ---- */}
           <section className="mt-4">

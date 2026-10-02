@@ -121,9 +121,9 @@ async function callGemini(
   // fall back to the well-supported lite variant instead of relying on retired
   // pinned names.
   const MODELS = [
-    "gemini-3.8-flash",
     "gemini-flash-lite-latest",
     "gemini-flash-latest",
+    "gemini-3.8-flash",
   ];
   let lastError = "Gemini request failed";
 

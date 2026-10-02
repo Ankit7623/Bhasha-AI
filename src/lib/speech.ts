@@ -59,7 +59,7 @@ export const isRecognitionSupported = () => getRecognitionCtor() !== null;
 
 export function startSpeechRecognition(options: {
   lang: string;
-  onResult: (text: string) => void;
+  onResult: (text: string, isFinal: boolean) => void;
   onError: (message: string) => void;
   onEnd?: () => void;
 }): SRInstance | null {
@@ -70,18 +70,22 @@ export function startSpeechRecognition(options: {
     const recognition = new Ctor();
     recognition.lang = options.lang;
     recognition.continuous = false;
-    recognition.interimResults = false;
+    recognition.interimResults = true;
     recognition.maxAlternatives = 1;
 
     recognition.onresult = (event: SREvent) => {
       let transcript = "";
+      let isFinal = false;
       for (let i = event.resultIndex; i < event.results.length; i += 1) {
         const result = event.results[i];
         const chunk = result[0]?.transcript?.trim() ?? "";
         if (chunk) transcript = chunk;
-        if (result.isFinal) break;
+        if (result.isFinal) {
+          isFinal = true;
+          break;
+        }
       }
-      if (transcript) options.onResult(transcript);
+      if (transcript) options.onResult(transcript, isFinal);
     };
 
     recognition.onerror = (event: SRErrorEvent) => {
@@ -169,26 +173,49 @@ export function speakText(
   }
   try {
     const synth = window.speechSynthesis;
-    synth.cancel(); // interrupt anything already speaking
-    const utterance = new SpeechSynthesisUtterance(message);
-    utterance.lang = locale;
-    utterance.rate = 0.98;
-    utterance.pitch = 1;
-    const voice = pickVoice(locale);
-    if (voice) utterance.voice = voice;
-    if (onEnd) {
-      let done = false;
-      const once = () => {
-        if (done) return;
-        done = true;
-        onEnd();
-      };
-      utterance.onend = once;
-      // Safety net: some engines never fire onend after synth.cancel()
-      const estimate = Math.min(20000, 1800 + message.length * 90) + 2500;
-      window.setTimeout(once, estimate);
+    synth.cancel();
+
+    // Split long text into natural sentence chunks (< 180 chars) for seamless playback
+    const rawParts = message.split(/(?<=[।.\n?!])/);
+    const chunks: string[] = [];
+    let buffer = "";
+
+    for (const part of rawParts) {
+      if ((buffer + part).length < 180) {
+        buffer += part;
+      } else {
+        if (buffer.trim()) chunks.push(buffer.trim());
+        buffer = part;
+      }
     }
-    synth.speak(utterance);
+    if (buffer.trim()) chunks.push(buffer.trim());
+
+    if (!chunks.length) {
+      onEnd?.();
+      return false;
+    }
+
+    const voice = pickVoice(locale);
+    let index = 0;
+
+    const speakNext = () => {
+      if (index >= chunks.length) {
+        onEnd?.();
+        return;
+      }
+      const text = chunks[index];
+      index += 1;
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = locale;
+      utterance.rate = 0.98;
+      utterance.pitch = 1;
+      if (voice) utterance.voice = voice;
+      utterance.onend = speakNext;
+      utterance.onerror = speakNext;
+      synth.speak(utterance);
+    };
+
+    speakNext();
     return true;
   } catch {
     onEnd?.();
